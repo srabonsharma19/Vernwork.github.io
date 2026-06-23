@@ -1,0 +1,23 @@
+# Backend
+backend/venv/
+backend/__pycache__/
+backend/*.pyc
+backend/logs/
+backend/uploads/
+backend/.env
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# General Python
+__pycache__/
+*.py[cod]
+
+# Environment files
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
