@@ -1,0 +1,25 @@
+<h2>User Profile</h2>
+
+<div class="profile-container">
+
+  <p><strong>User clicked:</strong> {{ name }}</p>
+  <p><strong>ID:</strong> {{ userJson.id }}</p>
+  <p><strong>Email:</strong> {{ userJson.email }}</p>
+  <p><strong>Username:</strong> {{ userJson.username }}</p>
+  <p><strong>Provider:</strong> {{ userJson.provider }}</p>
+  <p><strong>Created At:</strong> {{ userJson.created_at }}</p>
+
+  <p><strong>Country:</strong> {{ userJson.country }}</p>
+  <p><strong>Student Status:</strong> {{ userJson.student_status }}</p>
+  <p><strong>Experience Level:</strong> {{ userJson.experience_level }}</p>
+  <p><strong>Schedule Preference:</strong> {{ userJson.schedule_preference }}</p>
+  <p><strong>Social Platform:</strong> {{ userJson.social_platform }}</p>
+  <p><strong>Program Type:</strong> {{ userJson.program_type }}</p>
+  <p><strong>Availability:</strong> {{ userJson.availability }}</p>
+
+  <hr />
+
+  <!-- Show full JSON for debugging -->
+  <pre>{{ userJson | json }}</pre>
+
+</div>

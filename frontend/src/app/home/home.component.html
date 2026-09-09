@@ -1,0 +1,179 @@
+<div class="page-wrapper">
+  <div class="app-frame">
+
+    <!-- Progress bar -->
+    <div class="progress-container">
+      <div class="progress-bar" [style.width.%]="updateProgress()"></div>
+    </div>
+
+    <!-- Slides wrapper -->
+    <div class="slides-wrapper">
+
+      <!-- SLIDE 1 — ACCOUNT CREATION -->
+      <div class="slide" *ngIf="currentSlide === 1">
+
+        <h2 class="slide-title">Create your account</h2>
+        <p class="slide-subtitle">Let's get your secure Vernwork identity verified and ready.</p>
+
+        <div class="form-group">
+
+          <label for="username">User Name</label>
+          <input id="username" name="username" type="text" class="input-field"
+                 placeholder="User Name" [(ngModel)]="username" />
+          <div *ngIf="showError && !username" class="error">Required *</div>
+
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" class="input-field"
+                 placeholder="Password" [(ngModel)]="password" />
+          <div *ngIf="showError && !password" class="error">Required *</div>
+
+          <div class="auth-helper-links">
+            <a class="forgot-link" routerLink="/forgot">Forgot password?</a>
+            <button class="login-btn" (click)="handleLoginRedirect()">Login</button>
+          </div>
+        </div>
+
+        <div class="footer-actions">
+          <button class="google-login-btn" (click)="createAccount()">
+            <span class="google-icon">G</span>
+            <span class="google-text">Login with Google</span>
+          </button>
+        </div>
+
+        <div id="google-oauth-popup-button"></div>
+      </div>
+
+      <!-- SLIDE 2 — STUDENT STATUS -->
+      <div class="slide" *ngIf="currentSlide === 2">
+        <h2 class="slide-title">Are you currently a student?</h2>
+        <p class="slide-subtitle">We tailor opportunities according to your academic track status.</p>
+
+        <label for="status">Select your status</label>
+        <select id="status" name="status" class="select-field" [(ngModel)]="selectedStatus">
+          <option disabled selected value="">Select your status</option>
+          <option value="student">Active Student</option>
+          <option value="graduated">Graduated</option>
+          <option value="other">Other Status</option>
+        </select>
+        <div *ngIf="showError && !selectedStatus" class="error">Required *</div>
+
+        <div class="footer-actions">
+          <button class="login-btn" (click)="nextSlide()">Enter</button>
+        </div>
+      </div>
+
+      <!-- SLIDE 3 — EXPERIENCE -->
+      <div class="slide" *ngIf="currentSlide === 3">
+        <h2 class="slide-title">Do you have prior experience?</h2>
+        <p class="slide-subtitle">We offer entry-level tracks up to expert programs.</p>
+
+        <label for="experience">Experience level</label>
+        <select id="experience" name="experience" class="select-field" [(ngModel)]="selectedExperience">
+          <option disabled selected value="">Select experience level</option>
+          <option value="beginner">No experience / Entry</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="advanced">Advanced Expert</option>
+        </select>
+        <div *ngIf="showError && !selectedExperience" class="error">Required *</div>
+
+        <div class="footer-actions">
+          <button class="login-btn" (click)="nextSlide()">Enter</button>
+        </div>
+      </div>
+
+      <!-- SLIDE 4 — COUNTRY -->
+      <div class="slide" *ngIf="currentSlide === 4">
+        <h2 class="slide-title">Which country are you from?</h2>
+        <p class="slide-subtitle">This helps ensure contracts align with local regulations.</p>
+
+        <label for="country">Select your region</label>
+        <select id="country" name="country" class="select-field" [(ngModel)]="selectedCountry">
+          <option disabled selected value="">Select your region</option>
+          <option value="UAE">United Arab Emirates</option>
+          <option value="US">United States</option>
+          <option value="UK">United Kingdom</option>
+          <option value="CA">Canada</option>
+          <option value="Other">Other Global Region</option>
+        </select>
+        <div *ngIf="showError && !selectedCountry" class="error">Required *</div>
+
+        <div class="footer-actions">
+          <button class="login-btn" (click)="nextSlide()">Enter</button>
+        </div>
+      </div>
+
+      <!-- SLIDE 5 — SCHEDULE -->
+      <div class="slide" *ngIf="currentSlide === 5">
+        <h2 class="slide-title">What schedules match your style?</h2>
+        <p class="slide-subtitle">Choose the types of project arrangements you want.</p>
+
+        <label for="schedule">Schedule preference</label>
+        <select id="schedule" name="schedule" class="select-field" [(ngModel)]="selectedSchedule">
+          <option disabled selected value="">Select schedule preference</option>
+          <option value="part-time">Part-time roles</option>
+          <option value="full-time">Full-time paths</option>
+          <option value="freelance">Freelance / Gig</option>
+        </select>
+        <div *ngIf="showError && !selectedSchedule" class="error">Required *</div>
+
+        <div class="footer-actions">
+          <button class="login-btn" (click)="nextSlide()">Enter</button>
+        </div>
+      </div>
+
+      <!-- SLIDE 6 — SOCIAL MEDIA -->
+      <div class="slide" *ngIf="currentSlide === 6">
+        <h2 class="slide-title">How did you reach us?</h2>
+        <p class="slide-subtitle">Select the platform where you first encountered us.</p>
+
+        <div class="selection-grid">
+          <div class="grid-card" (click)="selectCard()">Discord</div>
+          <div class="grid-card" (click)="selectCard()">X (Twitter)</div>
+          <div class="grid-card" (click)="selectCard()">Telegram</div>
+          <div class="grid-card" (click)="selectCard()">Facebook</div>
+          <div class="grid-card" (click)="selectCard()">Reddit</div>
+          <div class="grid-card" (click)="selectCard()">YouTube</div>
+          <div class="grid-card" (click)="selectCard()">Instagram</div>
+          <div class="grid-card full-width" (click)="selectCard()">Friends</div>
+        </div>
+
+        <div class="footer-actions">
+          <button class="login-btn" (click)="nextSlide()">Enter</button>
+        </div>
+      </div>
+
+      <!-- SLIDE 7 — PROGRAM TYPE -->
+      <div class="slide" *ngIf="currentSlide === 7">
+        <h2 class="slide-title">What type of program do you want?</h2>
+        <p class="slide-subtitle">Select the profile structure matching your objective.</p>
+
+        <div class="selection-grid">
+          <div class="grid-card" (click)="selectCard()">You are a company</div>
+          <div class="grid-card" (click)="selectCard()">New founder startup</div>
+          <div class="grid-card full-width" (click)="selectCard()">Looking for experience & certificate</div>
+        </div>
+
+        <div class="footer-actions">
+          <button class="login-btn" (click)="nextSlide()">Enter</button>
+        </div>
+      </div>
+
+      <!-- SLIDE 8 — AVAILABILITY -->
+      <div class="slide" *ngIf="currentSlide === 8">
+        <h2 class="slide-title">Your availability horizon?</h2>
+        <p class="slide-subtitle">Specify when you are ready to accept assignments.</p>
+
+        <div class="selection-grid">
+          <div class="grid-card" (click)="selectCard()">Immediate action</div>
+          <div class="grid-card" (click)="selectCard()">Within 1 month</div>
+        </div>
+
+        <div class="footer-actions">
+          <button class="login-btn" (click)="finishOnboarding()">Enter</button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>

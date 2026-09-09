@@ -1,0 +1,144 @@
+.main-wrapper {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f7f7f7;
+}
+
+/* TOP BAR */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px;
+  background: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.profile-icon {
+  width: 40px;
+  height: 40px;
+  background: #ccc;
+  border-radius: 50%;
+}
+
+.search-box input {
+  width: 500px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+}
+
+.berry-counter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.berry-icon {
+  width: 22px;
+}
+
+/* DUCK VIDEO AREA */
+.duck-area {
+  width: 100%;
+  height: 180px;
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+ 
+.duck-video {
+  width: 15%;
+  height: 160px;
+  border-radius: 30px;
+  object-fit: cover;
+}
+
+/* JOB FEED */
+.job-feed {
+  flex: 1;
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  overflow-y: scroll;
+}
+
+.feed-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.job-card {
+  background: white;
+  padding: 14px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.job-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.job-profile {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.job-title {
+  font-size: 0.85rem;
+  color: #777;
+}
+
+.job-description {
+  margin: 10px 0;
+  font-size: 0.9rem;
+}
+
+.job-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.job-budget {
+  font-weight: 700;
+  color: #9333ea;
+}
+
+.apply-btn {
+  padding: 8px 14px;
+  border: none;
+  background: #9333ea;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+/* BOTTOM NAV */
+.bottom-nav {
+  height: 60px;
+  background: white;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
+}
+
+.nav-item {
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.plus-btn {
+  font-size: 2rem;
+  color: #9333ea;
+}

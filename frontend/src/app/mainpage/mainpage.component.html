@@ -1,0 +1,106 @@
+<div class="main-wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="profile-icon"></div>
+
+    <div class="search-box">
+      <input type="text" placeholder="Search jobs, people..." />
+    </div>
+
+    <div class="berry-counter">
+      <img src="assets/blueberry.png" class="berry-icon" alt="Berry icon" />
+      <span>{{ berries }} berries</span>
+    </div>
+  </div>
+
+  <!-- DUCK VIDEO AREA -->
+  <div class="duck-area">
+    <video class="duck-video" autoplay muted loop>
+      <source src="assets/duck.mp4" type="video/mp4" />
+    </video>
+  </div>
+
+  <!-- JOB FEED -->
+  <div class="job-feed">
+
+    <!-- LEFT COLUMN -->
+    <div class="feed-column">
+      <div class="job-card" *ngFor="let job of leftJobs">
+        <div class="job-header">
+          <img 
+            [src]="profileOptions[job.chosenPfp]" 
+            class="job-profile"
+            alt="Profile picture"
+            [alt]="job.name + ' profile picture'"
+          />
+
+          <div>
+            <!-- ⭐ NAME IS CLICKABLE NOW -->
+            <h3 [routerLink]="['/profile', job.name]">
+              {{ job.name }}
+            </h3>
+
+            <p class="job-title">{{ job.title }}</p>
+          </div>
+        </div>
+
+        <p class="job-description">{{ job.description }}</p>
+
+        <div class="job-footer">
+          <span class="job-budget">{{ job.budget }}</span>
+
+          <!-- ⭐ BUTTON ALSO USES NAME -->
+          <button class="apply-btn" [routerLink]="['/profile', job.name]">
+            View Profile
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="feed-column">
+      <div class="job-card" *ngFor="let job of rightJobs">
+        <div class="job-header">
+          <img 
+            [src]="getProfileImage(job.chosenPfp)" 
+            class="job-profile"
+            alt="Profile picture"
+            [alt]="job.name + ' profile picture'"
+          />
+
+          <div>
+            <!-- ⭐ NAME IS CLICKABLE HERE TOO -->
+            <h3 [routerLink]="['/profile', job.name]">
+              {{ job.name }}
+            </h3>
+
+            <p class="job-title">{{ job.title }}</p>
+          </div>
+        </div>
+
+        <p class="job-description">{{ job.description }}</p>
+
+        <div class="job-footer">
+          <span class="job-budget">{{ job.budget }}</span>
+
+          <!-- ⭐ BUTTON ALSO USES NAME -->
+          <button class="apply-btn" [routerLink]="['/profile', job.name]">
+            View Profile
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM NAVIGATION -->
+  <div class="bottom-nav">
+    <div class="nav-item">🏠</div>
+    <div class="nav-item">🔍</div>
+    <div class="nav-item plus-btn">＋</div>
+    <div class="nav-item">❤️</div>
+    <div class="nav-item">⚙️</div>
+  </div>
+
+</div>
