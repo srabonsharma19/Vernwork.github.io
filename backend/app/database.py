@@ -1,28 +1,29 @@
+from pathlib import Path
+
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
 from dotenv import load_dotenv
 import os
 
-# Load environment variables from .env
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
-# Read the DATABASE_URL from .env
-DATABASE_URL = os.getenv("DATABASE_URL")
+configured_database_url = os.getenv("DATABASE_URL")
+if os.getenv("VERNWORK_ENV", "development").lower() == "production" and not configured_database_url:
+    raise RuntimeError("DATABASE_URL must be configured for production; refusing to start on SQLite")
 
-# Create SQLAlchemy engine
-engine = create_engine(
-    DATABASE_URL,
-    pool_pre_ping=True,   # Prevents stale connection errors
-    pool_size=10,
-    max_overflow=20
-)
+DATABASE_URL = configured_database_url or f"sqlite:///{(Path(__file__).resolve().parents[1] / 'vernwork.db').as_posix()}"
+
+engine_options = {"pool_pre_ping": True}
+if DATABASE_URL.startswith("sqlite"):
+    engine_options["connect_args"] = {"check_same_thread": False}
+else:
+    engine_options.update({"pool_size": 10, "max_overflow": 20})
+
+engine = create_engine(DATABASE_URL, **engine_options)
 
 # Create session factory
 SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine
+    autocommit=False, autoflush=False, bind=engine, expire_on_commit=False
 )
 
 # Base class for models

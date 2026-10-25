@@ -1,25 +1,119 @@
-<h2>User Profile</h2>
+<div class="profile-page" *ngIf="userJson && userJson.id; else loading">
+  <div class="profile-shell">
+    <header class="profile-header">
+      <div class="cover-photo"></div>
+      <div class="profile-topbar">
+        <div class="avatar-wrap">
+          <img *ngIf="userJson.avatar_url; else initialsAvatar" class="avatar avatar-photo" [src]="userJson.avatar_url" [alt]="displayName + ' profile photo'" referrerpolicy="no-referrer" />
+          <ng-template #initialsAvatar><div class="avatar">{{ displayName.charAt(0).toUpperCase() }}</div></ng-template>
+        </div>
 
-<div class="profile-container">
+        <div class="profile-actions">
+          <a *ngIf="userJson.id === userId" class="primary-btn" routerLink="/settings">Edit profile</a>
+          <a class="secondary-btn" routerLink="/main">Find projects</a>
+        </div>
+      </div>
 
-  <p><strong>User clicked:</strong> {{ name }}</p>
-  <p><strong>ID:</strong> {{ userJson.id }}</p>
-  <p><strong>Email:</strong> {{ userJson.email }}</p>
-  <p><strong>Username:</strong> {{ userJson.username }}</p>
-  <p><strong>Provider:</strong> {{ userJson.provider }}</p>
-  <p><strong>Created At:</strong> {{ userJson.created_at }}</p>
+      <div class="profile-summary">
+        <div>
+          <h1>{{ displayName }}</h1>
+          <p class="headline">{{ userJson.provider || 'Vernwork member' }} · {{ userJson.location || userJson.country || 'Location not set' }}</p>
+          <p class="meta">Member since {{ createdAt }}</p>
+        </div>
+        <div class="profile-badges">
+          <span>Open to work</span>
+          <span>{{ userJson.student_status || 'Student status not set' }}</span>
+        </div>
+      </div>
+    </header>
 
-  <p><strong>Country:</strong> {{ userJson.country }}</p>
-  <p><strong>Student Status:</strong> {{ userJson.student_status }}</p>
-  <p><strong>Experience Level:</strong> {{ userJson.experience_level }}</p>
-  <p><strong>Schedule Preference:</strong> {{ userJson.schedule_preference }}</p>
-  <p><strong>Social Platform:</strong> {{ userJson.social_platform }}</p>
-  <p><strong>Program Type:</strong> {{ userJson.program_type }}</p>
-  <p><strong>Availability:</strong> {{ userJson.availability }}</p>
+    <main class="profile-content">
+      <section class="profile-card about-card">
+        <h2>About</h2>
+        <p>
+          {{ userJson.username || 'This member' }} is a verified user on Vernwork with a focus on
+          {{ userJson.experience_level || 'professional growth' }} and a preferred schedule of
+          {{ userJson.schedule_preference || 'flexible availability' }}. Their profile reflects
+          {{ userJson.program_type || 'a strong interest in learning and collaboration' }} across
+          meaningful work opportunities.
+        </p>
+      </section>
 
-  <hr />
+      <section class="profile-card stats-card">
+        <div class="stat-item">
+          <strong>{{ userJson.experience_level || 'N/A' }}</strong>
+          <span>Experience</span>
+        </div>
+        <div class="stat-item">
+          <strong>{{ userJson.schedule_preference || 'Flexible' }}</strong>
+          <span>Schedule</span>
+        </div>
+        <div class="stat-item">
+          <strong>{{ userJson.availability || 'Open' }}</strong>
+          <span>Availability</span>
+        </div>
+        <div class="stat-item">
+          <strong>{{ userJson.social_platform || 'LinkedIn' }}</strong>
+          <span>Platform</span>
+        </div>
+      </section>
 
-  <!-- Show full JSON for debugging -->
-  <pre>{{ userJson | json }}</pre>
-
+      <section class="profile-card info-card">
+        <h2>Profile Details</h2>
+        <div class="info-grid">
+          <div class="info-row">
+            <span class="label">Display name</span>
+            <span class="value">{{ userJson.full_name || 'Not provided' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Username</span>
+            <span class="value">{{ userJson.username || 'Not provided' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Provider</span>
+            <span class="value">{{ userJson.provider || 'Not provided' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Country</span>
+            <span class="value">{{ userJson.country || 'Not provided' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Location</span>
+            <span class="value">{{ userJson.location || 'Not provided' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Student status</span>
+            <span class="value">{{ userJson.student_status || 'Not provided' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Experience level</span>
+            <span class="value">{{ userJson.experience_level || 'Not provided' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Schedule preference</span>
+            <span class="value">{{ userJson.schedule_preference || 'Not provided' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Joined</span>
+            <span class="value">{{ createdAt }}</span>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
 </div>
+
+<ng-template #loading>
+  <div class="profile-loading">
+    <p *ngIf="loadError" class="profile-error" role="alert">{{ loadError }}</p>
+    <ng-container *ngIf="!loadError">
+    <div class="loading-card">
+      <div class="loading-header"></div>
+      <div class="loading-avatar"></div>
+      <div class="loading-line short"></div>
+      <div class="loading-line"></div>
+      <div class="loading-line"></div>
+    </div>
+    </ng-container>
+  </div>
+</ng-template>

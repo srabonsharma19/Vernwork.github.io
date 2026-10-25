@@ -1,1 +1,16 @@
-<router-outlet />
+<main *ngIf="!accessChecked" class="access-state" aria-live="polite">Connecting to Vernwork...</main>
+
+<main class="access-gate" [hidden]="!accessChecked || !pinRequired || unlocked">
+	<form class="access-panel" (ngSubmit)="unlock()">
+		<a class="access-wordmark" href="/">vernwork<span>.</span></a>
+		<p class="access-kicker">PRIVATE PREVIEW</p>
+		<h1>Enter your access PIN.</h1>
+		<p class="access-copy">This workspace is private. Enter the PIN shared with you to continue.</p>
+		<label for="access-pin">Access PIN</label>
+		<input id="access-pin" name="pin" type="password" [(ngModel)]="pin" autocomplete="current-password" required autofocus />
+		<p *ngIf="accessError" class="access-error" role="alert">{{ accessError }}</p>
+		<button type="submit" [disabled]="busy || !pin">{{ busy ? 'Checking...' : 'Unlock workspace' }}</button>
+	</form>
+</main>
+
+<router-outlet *ngIf="accessChecked && (!pinRequired || unlocked)" />

@@ -1,210 +1,155 @@
+import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { RouterModule } from '@angular/router';
 
-declare const google: any;
+interface GoogleCredentialResponse {
+  credential: string;
+}
+
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        id: {
+          initialize(config: { client_id: string; callback: (response: GoogleCredentialResponse) => void }): void;
+          renderButton(element: HTMLElement, config: { theme: string; size: string; text: string; shape: string }): void;
+        };
+      };
+    };
+  }
+}
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements AfterViewInit {
+  @ViewChild('googleButton') private googleButton?: ElementRef<HTMLDivElement>;
 
-  currentSlide = 1;
-  totalSlides = 8;
-
+  mode: 'login' | 'register' = 'register';
   username = '';
+  identity = '';
+  email = '';
   password = '';
+  busy = false;
+  errorMessage = '';
+  private googleReady = false;
 
-  selectedCountry = '';
-  selectedStatus = '';
-  selectedExperience = '';
-  selectedSchedule = '';
+  constructor(private http: HttpClient, private router: Router) {}
 
-  googleConnected = false;
-  showError = false;
+  ngAfterViewInit(): void {
+    this.loadGoogleIdentity();
+  }
 
-  private googleInitialized = false;
+  setMode(mode: 'login' | 'register'): void {
+    this.mode = mode;
+    this.errorMessage = '';
+    this.password = '';
+  }
 
-  constructor(
-    private http: HttpClient,
-    private router: Router
-  ) {}
+  submit(): void {
+    this.errorMessage = '';
+    const normalizedEmail = this.email.trim();
+    const normalizedUsername = this.username.trim();
+    const normalizedIdentity = this.identity.trim();
 
-  /* -----------------------------------------
-     INITIALIZATION
-     ----------------------------------------- */
-  ngOnInit() {
-    const id = localStorage.getItem('vernwork_id');
-    if (id) {
-      this.router.navigate(['/profile', id]);
+    if (this.mode === 'register' && !/^[a-zA-Z0-9_.-]{3,40}$/.test(normalizedUsername)) {
+      this.errorMessage = 'Username must be 3-40 characters and use only letters, numbers, dots, hyphens, or underscores.';
+      return;
+    }
+    if (this.mode === 'register' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      this.errorMessage = 'Enter a valid email address.';
+      return;
+    }
+    if (this.mode === 'login' && !normalizedIdentity) {
+      this.errorMessage = 'Enter your username or email address.';
+      return;
+    }
+    if (this.password.length < (this.mode === 'register' ? 10 : 1)) {
+      this.errorMessage = this.mode === 'register'
+        ? 'Password must be at least 10 characters.'
+        : 'Enter your password.';
+      return;
+    }
+    if (new TextEncoder().encode(this.password).length > 72) {
+      this.errorMessage = 'Password must be no more than 72 bytes.';
       return;
     }
 
-    this.initializeGoogleSignIn();
-  }
+    this.busy = true;
+    const url = this.mode === 'register' ? '/api/auth/register' : '/api/auth/login';
+    const payload = this.mode === 'register'
+      ? { username: normalizedUsername, email: normalizedEmail, password: this.password }
+      : { identity: normalizedIdentity, password: this.password };
 
-  /* -----------------------------------------
-     GOOGLE INIT
-     ----------------------------------------- */
-  private initializeGoogleSignIn() {
-    if (this.googleInitialized) return;
-
-    if (typeof google === 'undefined' || !google.accounts?.id) {
-      console.error('Google Identity Services library is not loaded.');
-      return;
-    }
-
-    try {
-      google.accounts.id.initialize({
-        client_id: '154910487693-f8ma15lghaons0s39uugqb147lnka5rd.apps.googleusercontent.com',
-        callback: (response: any) => this.handleGoogleLogin(response),
-        ux_mode: 'popup',
-        auto_select: false,
-        itp_support: true
-      });
-
-      this.googleInitialized = true;
-    } catch (error) {
-      console.error('Failed to initialize Google Sign-In:', error);
-    }
-  }
-
-  /* -----------------------------------------
-     SLIDE NAVIGATION
-     ----------------------------------------- */
-  updateProgress() {
-    return (this.currentSlide / this.totalSlides) * 100;
-  }
-
-  nextSlide() {
-    this.currentSlide++;
-  }
-
-  selectCard() {
-    setTimeout(() => this.nextSlide(), 300);
-  }
-
-  /* -----------------------------------------
-     AUTH NAVIGATION
-     ----------------------------------------- */
-  handleForgotPassword() {
-    this.router.navigate(['/forgot']);
-  }
-
-  handleLoginRedirect() {
-    this.router.navigate(['/login']);
-  }
-
-  /* -----------------------------------------
-     CREATE ACCOUNT (Google + Slide 1)
-     ----------------------------------------- */
-  createAccount() {
-
-    // FIRST PRESS → Google login
-    if (!this.googleConnected) {
-      try {
-        let googleButtonDiv = document.getElementById('google-oauth-popup-button');
-
-        if (!googleButtonDiv) {
-          googleButtonDiv = document.createElement('div');
-          googleButtonDiv.id = 'google-oauth-popup-button';
-          googleButtonDiv.style.display = 'none';
-          document.body.appendChild(googleButtonDiv);
-        }
-
-        google.accounts.id.renderButton(googleButtonDiv, {
-          theme: 'outline',
-          size: 'large',
-          text: 'signup_with',
-          locale: 'en'
-        });
-
-        const oauthButton = googleButtonDiv.querySelector('[role="button"]') as HTMLElement;
-
-        if (oauthButton) {
-          oauthButton.click();
-        }
-      } catch (error) {
-        alert('Google Sign-In failed. Please try again.');
+    this.http.post<{ id: number }>(url, payload).subscribe({
+      next: (account) => this.finishSignIn(account.id),
+      error: (error) => {
+        this.busy = false;
+        this.errorMessage = error.error?.detail || 'We could not sign you in. Check your details and try again.';
       }
-
-      return;
-    }
-
-    // SECOND PRESS → Validate username/password only
-    if (!this.username || !this.password) {
-      this.showError = true;
-      return;
-    }
-
-    // Move to slide 2
-    this.nextSlide();
-  }
-
-  /* -----------------------------------------
-     FINAL SAVE AFTER SLIDE 8
-     ----------------------------------------- */
-  finishOnboarding() {
-
-    if (!this.selectedCountry ||
-        !this.selectedStatus ||
-        !this.selectedExperience ||
-        !this.selectedSchedule) {
-
-      this.showError = true;
-      return;
-    }
-
-    const id = localStorage.getItem("vernwork_id");
-
-    this.http.post("http://localhost:8000/api/auth/update-profile", {
-      id: id,
-      username: this.username,
-      password: this.password,
-      country: this.selectedCountry,
-      student_status: this.selectedStatus,
-      experience_level: this.selectedExperience,
-      schedule_preference: this.selectedSchedule
-    }).subscribe(res => {
-      console.log('Profile updated:', res);
-      this.router.navigate(['/main']);
     });
   }
 
-  /* -----------------------------------------
-     GOOGLE LOGIN CALLBACK
-     ----------------------------------------- */
-  handleGoogleLogin(response: any) {
-    if (!response?.credential) return;
+  private loadGoogleIdentity(): void {
+    const clientId = document.querySelector<HTMLMetaElement>('meta[name="google-client-id"]')?.content.trim();
+    if (!clientId || !this.googleButton) return;
 
-    const decoded = JSON.parse(atob(response.credential.split('.')[1]));
-    const email = decoded.email;
+    const render = () => {
+      if (this.googleReady || !window.google?.accounts.id || !this.googleButton) return;
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: (response) => this.completeGoogleSignIn(response)
+      });
+      window.google.accounts.id.renderButton(this.googleButton.nativeElement, {
+        theme: 'outline', size: 'large', text: 'continue_with', shape: 'rectangular'
+      });
+      this.googleReady = true;
+    };
 
-    this.loginWithGoogle(email);
+    if (window.google?.accounts.id) {
+      render();
+      return;
+    }
 
-    this.googleConnected = true;
+    const script = document.querySelector<HTMLScriptElement>('script[data-google-identity]');
+    if (script) {
+      script.addEventListener('load', render, { once: true });
+      return;
+    }
 
-    // Stay on slide 1 until username/password are filled
+    const identityScript = document.createElement('script');
+    identityScript.src = 'https://accounts.google.com/gsi/client';
+    identityScript.async = true;
+    identityScript.defer = true;
+    identityScript.dataset['googleIdentity'] = 'true';
+    identityScript.addEventListener('load', render, { once: true });
+    identityScript.addEventListener('error', () => {
+      this.errorMessage = 'Google sign-in could not load. Use email and password or check the network.';
+    }, { once: true });
+    document.head.appendChild(identityScript);
   }
 
-  /* -----------------------------------------
-     BACKEND LOGIN CALL
-     ----------------------------------------- */
-  loginWithGoogle(email: string) {
-    this.http.post('http://localhost:8000/api/auth/connect', {
-      email: email,
-      provider: 'google'
-    }).subscribe((res: any) => {
-
-      localStorage.setItem('vernwork_id', res.id);
-
-      // User stays on slide 1 to complete username/password
+  private completeGoogleSignIn(response: GoogleCredentialResponse): void {
+    this.busy = true;
+    this.errorMessage = '';
+    this.http.post<{ id: number }>('/api/auth/google', { credential: response.credential }).subscribe({
+      next: (account) => this.finishSignIn(account.id),
+      error: (error) => {
+        this.busy = false;
+        this.errorMessage = error.error?.detail || 'Google sign-in could not be verified.';
+      }
     });
+  }
+
+  private finishSignIn(userId: number): void {
+    localStorage.setItem('vernwork_id', String(userId));
+    this.router.navigate(['/main']);
   }
 }

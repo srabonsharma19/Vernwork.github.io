@@ -1,0 +1,56 @@
+<main class="settings-page">
+  <header class="settings-header">
+    <a class="settings-wordmark" routerLink="/main">vernwork<span>.</span></a>
+    <nav aria-label="Settings navigation">
+      <a routerLink="/main">Marketplace</a>
+      <button type="button" (click)="signOut()">Sign out</button>
+    </nav>
+  </header>
+
+  <section class="settings-content">
+    <p class="settings-eyebrow">YOUR WORKSPACE</p>
+    <h1>Profile settings</h1>
+    <p class="settings-intro">Set the details clients and collaborators use to understand where you are and how you work.</p>
+
+    <p *ngIf="loading" class="settings-state">Loading your profile...</p>
+    <form *ngIf="!loading && !loadFailed" (ngSubmit)="save()" class="settings-form">
+      <div class="settings-section-heading"><h2>Public profile</h2><p>Your email stays private.</p></div>
+      <div class="settings-grid">
+        <label>Username<input name="username" [(ngModel)]="profile.username" required minlength="3" maxlength="40" pattern="[a-zA-Z0-9_.-]+" /></label>
+        <label>Display name<input name="fullName" [(ngModel)]="profile.full_name" maxlength="120" placeholder="Your name" /></label>
+        <label>Email address<input name="email" type="email" [value]="profile.email" readonly /></label>
+        <label>City or region<input name="location" [(ngModel)]="profile.location" maxlength="160" placeholder="e.g. Toronto, Canada" /></label>
+        <label>Country<input name="country" [(ngModel)]="profile.country" maxlength="100" placeholder="e.g. Canada" /></label>
+      </div>
+
+      <div class="settings-section-heading"><h2>How you work</h2><p>These appear on your public profile.</p></div>
+      <div class="settings-grid">
+        <label>Student status<select name="studentStatus" [(ngModel)]="profile.student_status"><option value="">Choose one</option><option value="student">Active student</option><option value="graduated">Graduated</option><option value="other">Other</option></select></label>
+        <label>Experience<select name="experience" [(ngModel)]="profile.experience_level"><option value="">Choose one</option><option value="beginner">Entry level</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></label>
+        <label>Schedule preference<select name="schedule" [(ngModel)]="profile.schedule_preference"><option value="">Choose one</option><option value="part-time">Part-time</option><option value="full-time">Full-time</option><option value="freelance">Freelance</option></select></label>
+        <label>Availability<select name="availability" [(ngModel)]="profile.availability"><option value="">Choose one</option><option value="immediate">Available now</option><option value="within-month">Within a month</option></select></label>
+        <label>Program type<input name="program" [(ngModel)]="profile.program_type" maxlength="100" /></label>
+        <label>How you found Vernwork<input name="social" [(ngModel)]="profile.social_platform" maxlength="50" /></label>
+      </div>
+
+      <p *ngIf="message" class="settings-success" role="status">{{ message }}</p>
+      <p *ngIf="error" class="settings-error" role="alert">{{ error }}</p>
+      <div class="settings-actions"><a routerLink="/main">Cancel</a><button type="submit" [disabled]="saving">{{ saving ? 'Saving...' : 'Save profile' }}</button></div>
+    </form>
+    <section *ngIf="!loading && !loadFailed" class="password-section">
+      <div class="settings-section-heading"><h2>Sign-in methods</h2><p>{{ profile.google_linked ? 'Google account linked' : 'Google account not linked' }}</p></div>
+      <form (ngSubmit)="savePassword()">
+        <label *ngIf="profile.has_password">Current password<input name="currentPassword" type="password" [(ngModel)]="currentPassword" autocomplete="current-password" required /></label>
+        <div class="settings-grid password-fields">
+          <label>New password<input name="newPassword" type="password" [(ngModel)]="newPassword" minlength="10" maxlength="72" autocomplete="new-password" required placeholder="At least 10 characters" /></label>
+          <label>Confirm new password<input name="confirmPassword" type="password" [(ngModel)]="confirmPassword" minlength="10" maxlength="72" autocomplete="new-password" required /></label>
+        </div>
+        <p class="password-help">{{ profile.has_password ? 'Changing your password requires your current password.' : 'Set a password so you can sign in with your username and password next time.' }}</p>
+        <p *ngIf="passwordMessage" class="settings-success" role="status">{{ passwordMessage }}</p>
+        <p *ngIf="passwordError" class="settings-error" role="alert">{{ passwordError }}</p>
+        <div class="settings-actions"><button type="submit" [disabled]="savingPassword">{{ savingPassword ? 'Saving...' : profile.has_password ? 'Change password' : 'Set password' }}</button></div>
+      </form>
+    </section>
+    <div *ngIf="!loading && loadFailed" class="settings-signin"><a routerLink="/home">Go to sign in</a><button type="button" (click)="signOut()">Sign out</button></div>
+  </section>
+</main>

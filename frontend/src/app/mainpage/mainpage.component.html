@@ -1,106 +1,100 @@
-<div class="main-wrapper">
-
-  <!-- TOP BAR -->
-  <div class="top-bar">
-    <div class="profile-icon"></div>
-
-    <div class="search-box">
-      <input type="text" placeholder="Search jobs, people..." />
+<div class="marketplace-shell">
+  <header class="topbar">
+    <a class="wordmark" routerLink="/main" aria-label="Vernwork home">vernwork<span>.</span></a>
+    <nav class="primary-nav" aria-label="Primary navigation">
+      <button type="button" [class.active]="activeView === 'browse'" (click)="selectView('browse')">Find work</button>
+      <button type="button" [class.active]="activeView === 'saved'" (click)="selectView('saved')">Saved jobs</button>
+      <button type="button" [class.active]="activeView === 'proposals'" (click)="selectView('proposals')">My proposals</button>
+      <button type="button" routerLink="/settings">Settings</button>
+    </nav>
+    <div class="account-actions">
+      <button type="button" class="quiet-button" (click)="openProfile()">My profile</button>
+      <button type="button" class="avatar" aria-label="Open my profile" (click)="openProfile()">V</button>
     </div>
+  </header>
 
-    <div class="berry-counter">
-      <img src="assets/blueberry.png" class="berry-icon" alt="Berry icon" />
-      <span>{{ berries }} berries</span>
-    </div>
-  </div>
+  <main class="page-content">
+    <section class="welcome-row">
+      <div>
+        <p class="eyebrow">VERNWORK MARKETPLACE</p>
+        <h1>{{ activeView === 'browse' ? 'Find work that fits.' : activeView === 'saved' ? 'Your saved work.' : 'Your proposals.' }}</h1>
+        <p class="intro-copy">Good people. Thoughtful projects. Work that moves you forward.</p>
+      </div>
+      <button type="button" class="post-button" (click)="openJobForm()"><span aria-hidden="true">+</span> Post a project</button>
+    </section>
 
-  <!-- DUCK VIDEO AREA -->
-  <div class="duck-area">
-    <video class="duck-video" autoplay muted loop>
-      <source src="assets/duck.mp4" type="video/mp4" />
-    </video>
-  </div>
-
-  <!-- JOB FEED -->
-  <div class="job-feed">
-
-    <!-- LEFT COLUMN -->
-    <div class="feed-column">
-      <div class="job-card" *ngFor="let job of leftJobs">
-        <div class="job-header">
-          <img 
-            [src]="profileOptions[job.chosenPfp]" 
-            class="job-profile"
-            alt="Profile picture"
-            [alt]="job.name + ' profile picture'"
-          />
-
-          <div>
-            <!-- ⭐ NAME IS CLICKABLE NOW -->
-            <h3 [routerLink]="['/profile', job.name]">
-              {{ job.name }}
-            </h3>
-
-            <p class="job-title">{{ job.title }}</p>
-          </div>
+    <section class="market-layout" aria-label="Marketplace jobs">
+      <aside class="filter-panel">
+        <label class="search-label" for="job-search">Search projects</label>
+        <div class="search-control">
+          <span aria-hidden="true">⌕</span>
+          <input id="job-search" type="search" [(ngModel)]="searchText" placeholder="Title, skill, or poster name" />
         </div>
-
-        <p class="job-description">{{ job.description }}</p>
-
-        <div class="job-footer">
-          <span class="job-budget">{{ job.budget }}</span>
-
-          <!-- ⭐ BUTTON ALSO USES NAME -->
-          <button class="apply-btn" [routerLink]="['/profile', job.name]">
-            View Profile
+        <h2>Explore categories</h2>
+        <div class="category-list">
+          <button *ngFor="let category of categories" type="button" [class.selected]="selectedCategory === category" (click)="selectedCategory = category">
+            <span>{{ category }}</span><span *ngIf="category === 'All work'" class="category-count">{{ jobs.length }}</span>
           </button>
         </div>
-      </div>
-    </div>
+        <div class="trust-note"><span class="trust-mark">V</span><p><strong>Make work matter.</strong><br />Build your next chapter with people who value good work.</p></div>
+      </aside>
 
-    <!-- RIGHT COLUMN -->
-    <div class="feed-column">
-      <div class="job-card" *ngFor="let job of rightJobs">
-        <div class="job-header">
-          <img 
-            [src]="getProfileImage(job.chosenPfp)" 
-            class="job-profile"
-            alt="Profile picture"
-            [alt]="job.name + ' profile picture'"
-          />
-
-          <div>
-            <!-- ⭐ NAME IS CLICKABLE HERE TOO -->
-            <h3 [routerLink]="['/profile', job.name]">
-              {{ job.name }}
-            </h3>
-
-            <p class="job-title">{{ job.title }}</p>
+      <section class="results-panel">
+        <div class="results-heading">
+          <div><h2>{{ activeView === 'browse' ? 'Projects for you' : activeView === 'saved' ? 'Saved projects' : 'Submitted proposals' }}</h2><p>{{ visibleJobs.length }} opportunities</p></div>
+          <span class="sort-label">Curated for you</span>
+        </div>
+        <p *ngIf="loadError" class="notice error-notice" role="alert">{{ loadError }}</p>
+        <p *ngIf="notice" class="notice" role="status">{{ notice }}</p>
+        <p *ngIf="loadingJobs" class="loading-listings" role="status">Loading saved projects...</p>
+        <article *ngFor="let job of visibleJobs" class="job-card">
+          <div class="job-topline">
+            <img *ngIf="job.client_avatar_url; else clientInitials" class="client-avatar" [src]="job.client_avatar_url" [alt]="job.client + ' profile photo'" referrerpolicy="no-referrer" />
+            <ng-template #clientInitials><span class="client-avatar">{{ job.initials }}</span></ng-template>
+            <div class="client-meta">
+              <a *ngIf="job.client_id; else sampleClient" class="client-profile-link" [routerLink]="['/profile', job.client_id]">{{ job.client }}</a>
+              <ng-template #sampleClient><strong>{{ job.client }}</strong></ng-template>
+              <span>{{ job.posted }} · {{ job.proposals }} proposals</span>
+              <a *ngIf="job.client_id" class="view-client-link" [routerLink]="['/profile', job.client_id]">View poster profile</a>
+            </div>
+            <button type="button" class="save-button" [class.is-saved]="savedJobIds.includes(job.id)" [attr.aria-label]="savedJobIds.includes(job.id) ? 'Remove saved project' : 'Save project'" [attr.aria-pressed]="savedJobIds.includes(job.id)" (click)="toggleSaved(job)">{{ savedJobIds.includes(job.id) ? 'Saved' : 'Save' }}</button>
           </div>
-        </div>
+          <h3>{{ job.title }}</h3>
+          <p class="job-description">{{ job.description }}</p>
+          <div class="job-details"><span>{{ job.budgetType }}</span><strong>${{ job.budget | number }}{{ job.budgetType === 'Hourly' ? '/hr' : '' }}</strong><span class="detail-divider"></span><span>{{ job.category }}</span></div>
+          <div class="skill-list"><span *ngFor="let skill of job.skills">{{ skill }}</span></div>
+          <div class="job-actions">
+            <button type="button" class="apply-button" [disabled]="proposalJobIds.includes(job.id)" (click)="openProposal(job)">{{ proposalJobIds.includes(job.id) ? 'Proposal sent' : 'Send a proposal' }}</button>
+            <span *ngIf="proposalJobIds.includes(job.id)" class="sent-label">In your proposals</span>
+          </div>
+        </article>
+        <div *ngIf="!loadingJobs && visibleJobs.length === 0" class="empty-state"><span aria-hidden="true">⌕</span><h3>Nothing here just yet</h3><p>Try another category or search to find your next project.</p><button type="button" (click)="searchText = ''; selectedCategory = 'All work'; selectView('browse')">Browse all projects</button></div>
+      </section>
 
-        <p class="job-description">{{ job.description }}</p>
+      <aside class="right-rail">
+        <section class="rail-section profile-progress"><p class="eyebrow">YOUR NEXT STEP</p><h2>Make your profile work for you.</h2><p>Clients get to know the person behind the proposal.</p><button type="button" (click)="openProfile()">Complete your profile <span aria-hidden="true">→</span></button></section>
+        <section class="rail-section"><p class="eyebrow">VERNWORK NOTE</p><p class="rail-quote">“The best projects begin with a clear brief and a good conversation.”</p><span class="rail-byline">A better way to work, together.</span></section>
+      </aside>
+    </section>
+  </main>
 
-        <div class="job-footer">
-          <span class="job-budget">{{ job.budget }}</span>
-
-          <!-- ⭐ BUTTON ALSO USES NAME -->
-          <button class="apply-btn" [routerLink]="['/profile', job.name]">
-            View Profile
-          </button>
-        </div>
-      </div>
-    </div>
-
+  <div *ngIf="modal" class="modal-backdrop" (click)="closeModal()">
+    <section class="dialog" role="dialog" aria-modal="true" [attr.aria-labelledby]="modal === 'proposal' ? 'proposal-title' : 'job-form-title'" (click)="$event.stopPropagation()">
+      <button type="button" class="dialog-close" aria-label="Close dialog" (click)="closeModal()">×</button>
+      <ng-container *ngIf="modal === 'proposal' && selectedJob">
+        <p class="eyebrow">MAKE YOUR INTRODUCTION</p><h2 id="proposal-title">Send a proposal</h2><p class="dialog-context">{{ selectedJob.title }}</p>
+        <label for="proposal-message">Cover letter</label><textarea id="proposal-message" rows="5" [(ngModel)]="proposalText" placeholder="Tell the client how you would approach this project..."></textarea>
+        <label for="proposal-rate">Your proposed amount (USD)</label><input id="proposal-rate" type="number" min="1" [(ngModel)]="proposalRate" />
+        <p *ngIf="formError" class="form-error" role="alert">{{ formError }}</p><button type="button" class="apply-button dialog-submit" (click)="submitProposal()">Submit proposal</button>
+      </ng-container>
+      <ng-container *ngIf="modal === 'job'">
+        <p class="eyebrow">START A COLLABORATION</p><h2 id="job-form-title">Post a project</h2><p class="dialog-context">Share a clear brief to find the right independent talent.</p>
+        <label for="new-job-title">Project title</label><input id="new-job-title" type="text" [(ngModel)]="jobTitle" placeholder="e.g. Design a simple product landing page" />
+        <label for="new-job-category">Category</label><select id="new-job-category" [(ngModel)]="jobCategory"><option *ngFor="let category of categories.slice(1)" [value]="category">{{ category }}</option></select>
+        <label for="new-job-description">Project details</label><textarea id="new-job-description" rows="4" [(ngModel)]="jobDescription" placeholder="What needs to be done, and what does success look like?"></textarea>
+        <label for="new-job-budget">Fixed budget (USD)</label><input id="new-job-budget" type="number" min="1" [(ngModel)]="jobBudget" placeholder="500" />
+        <p *ngIf="formError" class="form-error" role="alert">{{ formError }}</p><button type="button" class="apply-button dialog-submit" [disabled]="postingJob" (click)="publishJob()">{{ postingJob ? 'Publishing...' : 'Publish project' }}</button>
+      </ng-container>
+    </section>
   </div>
-
-  <!-- BOTTOM NAVIGATION -->
-  <div class="bottom-nav">
-    <div class="nav-item">🏠</div>
-    <div class="nav-item">🔍</div>
-    <div class="nav-item plus-btn">＋</div>
-    <div class="nav-item">❤️</div>
-    <div class="nav-item">⚙️</div>
-  </div>
-
 </div>

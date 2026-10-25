@@ -2,9 +2,11 @@
 backend/venv/
 backend/__pycache__/
 backend/*.pyc
+backend/vernwork.db
 backend/logs/
 backend/uploads/
 backend/.env
+backend/.access-pin-hash
 
 # Frontend
 frontend/node_modules/
