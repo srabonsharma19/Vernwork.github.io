@@ -1,25 +1,19 @@
-# Backend
-backend/venv/
-backend/__pycache__/
-backend/*.pyc
-backend/vernwork.db
-backend/logs/
-backend/uploads/
-backend/.env
-backend/.access-pin-hash
+# Environment & Secrets
+.env
+.env.*
+*.env
+.access-pin-hash
+*.db
 
-# Frontend
-frontend/node_modules/
-frontend/dist/
-
-# General Python
+# Dependencies & Builds
+node_modules/
+dist/
+venv/
 __pycache__/
 *.py[cod]
 
-# Environment files
-.env
-.env.*
-
-# OS files
+# Logs & OS
+logs/
+uploads/
 .DS_Store
 Thumbs.db
