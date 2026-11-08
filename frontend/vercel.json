@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "http://5.31.207.175/:path*"
+      "destination": "https://sewing-futures-str-organization.trycloudflare.com/api/:path*"
     }
   ]
 }
