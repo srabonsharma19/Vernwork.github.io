@@ -1,0 +1,44 @@
+<main class="auth-page">
+  <section class="auth-intro">
+    <a class="auth-wordmark" routerLink="/main">vernwork<span>.</span></a>
+    <p class="auth-kicker">GOOD WORK, GOOD PEOPLE</p>
+    <h1>Make your next move<br />a meaningful one.</h1>
+    <p class="auth-copy">Find independent work, meet thoughtful clients, and build a working life that fits you.</p>
+    <div class="auth-statement"><span aria-hidden="true">01</span><p>Clear projects.<br />Real people. Better work.</p></div>
+  </section>
+
+  <section class="auth-panel" aria-labelledby="auth-title">
+    <div class="mode-switch" role="tablist" aria-label="Account access">
+      <button type="button" role="tab" [attr.aria-selected]="mode === 'register'" [class.selected]="mode === 'register'" (click)="setMode('register')">Create account</button>
+      <button type="button" role="tab" [attr.aria-selected]="mode === 'login'" [class.selected]="mode === 'login'" (click)="setMode('login')">Sign in</button>
+    </div>
+
+    <p class="auth-kicker">VERNWORK ACCOUNT</p>
+    <h2 id="auth-title">{{ mode === 'register' ? 'Start with the basics.' : 'Welcome back.' }}</h2>
+    <p class="panel-copy">{{ mode === 'register' ? 'Create your account to join the marketplace.' : 'Sign in to continue to your workspace.' }}</p>
+
+    <form (ngSubmit)="submit()">
+      <label *ngIf="mode === 'register'" for="username">Username</label>
+      <input *ngIf="mode === 'register'" id="username" name="username" [(ngModel)]="username" required minlength="3" maxlength="40" pattern="[a-zA-Z0-9_.-]+" autocomplete="username" placeholder="e.g. jordan.lee" />
+
+      <label *ngIf="mode === 'register'" for="email">Email address</label>
+      <input *ngIf="mode === 'register'" id="email" name="email" type="email" [(ngModel)]="email" required email autocomplete="email" placeholder="you@example.com" />
+
+      <label *ngIf="mode === 'login'" for="identity">Username or email</label>
+      <input *ngIf="mode === 'login'" id="identity" name="identity" [(ngModel)]="identity" required autocomplete="username" placeholder="Your username or email" />
+
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" [(ngModel)]="password" required [minlength]="mode === 'register' ? 10 : 1" maxlength="72" [autocomplete]="mode === 'register' ? 'new-password' : 'current-password'" placeholder="{{ mode === 'register' ? 'At least 10 characters' : 'Your password' }}" />
+      <p *ngIf="mode === 'register'" class="field-hint">Passwords are stored as bcrypt hashes, never as plain text.</p>
+
+      <p *ngIf="errorMessage" class="auth-error" role="alert">{{ errorMessage }}</p>
+      <button class="submit-button" type="submit" [disabled]="busy">
+        {{ busy ? 'Working...' : mode === 'register' ? 'Create account' : 'Sign in' }}
+      </button>
+    </form>
+
+    <div class="auth-divider"><span>or continue with</span></div>
+    <div #googleButton class="google-button" aria-label="Continue with Google"></div>
+    <p class="auth-footnote">Your profile email is private. Only your public profile details are shown to other members.</p>
+  </section>
+</main>

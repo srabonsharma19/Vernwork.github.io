@@ -1,0 +1,4 @@
+ALTER TABLE users
+    MODIFY COLUMN provider VARCHAR(20) NOT NULL,
+    ADD COLUMN password_hash VARCHAR(255) NULL,
+    ADD COLUMN location VARCHAR(160) NULL;
